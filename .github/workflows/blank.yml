@@ -1,4 +1,4 @@
-name: Playit RDP Tunnel
+name: qzx-windows
 
 on:
   workflow_dispatch:

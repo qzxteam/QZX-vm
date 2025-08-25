@@ -35,3 +35,8 @@ jobs:
         run: |
           sleep 5
           curl -s http://127.0.0.1:4040/api/tunnels
+
+      - name: sleep for work
+        run: |
+          sleep 21600
+          

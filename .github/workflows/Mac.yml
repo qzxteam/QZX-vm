@@ -4,22 +4,19 @@ on:
 
 jobs:
   build:
-    name: qzx-mac
     runs-on: macos-latest
-
     env:
       NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-
     steps:
-      - name: Reponun içeriğini al
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: VNC + ngrok başlat
+      - name: Run VNC + ngrok setup
         run: |
           chmod +x start.sh
           ./start.sh "$NGROK_AUTH_TOKEN"
 
-      - name: ngrok bağlantı adresini göster
+      - name: Show ngrok tunnel URL
         run: |
           sleep 5
           curl -s http://127.0.0.1:4040/api/tunnels

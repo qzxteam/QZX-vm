@@ -4,18 +4,33 @@ on:
 
 jobs:
   build:
+    name: qzx-mac
     runs-on: macos-latest
+
     env:
       NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+
     steps:
+      # Reponun içeriğini al (opsiyonel, login.sh gibi dosyalar varsa gerek)
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Run VNC + ngrok setup
+      # start.sh scriptini internetten indir ve çalıştır
+      - name: Download and run start.sh
         run: |
+          curl -s -o start.sh -L "https://raw.githubusercontent.com/JohnnyNetsec/github-vm/main/mac/start.sh"
           chmod +x start.sh
-          ./start.sh "$NGROK_AUTH_TOKEN"
+          bash start.sh "$NGROK_AUTH_TOKEN"
 
+      # (Opsiyonel) login.sh varsa bunu da çalıştır
+      - name: Log in to VNC server (optional)
+        run: |
+          if [ -f login.sh ]; then
+            chmod +x login.sh
+            bash login.sh
+          fi
+
+      # ngrok tünel adresini loglarda göster
       - name: Show ngrok tunnel URL
         run: |
           sleep 5

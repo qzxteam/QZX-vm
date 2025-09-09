@@ -1,0 +1,53 @@
+name: Ubuntu GNOME + TigerVNC via Ngrok
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  vnc:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 📦 Install Desktop Environment and VNC
+      run: |
+        sudo apt update
+        sudo apt install -y ubuntu-desktop gnome-panel gnome-settings-daemon metacity nautilus xterm tigervnc-standalone-server curl jq wget unzip dbus-x11
+
+    - name: 🔐 Set VNC password
+      run: |
+        mkdir -p ~/.vnc
+        echo "qzxubuntu" | vncpasswd -f > ~/.vnc/passwd
+        chmod 600 ~/.vnc/passwd
+
+    - name: ⚙️ Configure xstartup script
+      run: |
+        cat > ~/.vnc/xstartup <<EOF
+        #!/bin/sh
+        export XKL_XMODMAP_DISABLE=1
+        unset SESSION_MANAGER
+        unset DBUS_SESSION_BUS_ADDRESS
+        gnome-session &
+        EOF
+        chmod +x ~/.vnc/xstartup
+
+    - name: 🚀 Start VNC server
+      run: |
+        vncserver :1
+
+    - name: 🌐 Download and start ngrok
+      run: |
+        wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+        unzip ngrok-stable-linux-amd64.zip
+        chmod +x ngrok
+        ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+        ./ngrok tcp 5901 > ngrok.log &
+        sleep 5
+
+    - name: 🔎 Show ngrok public TCP address
+      run: |
+        curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+
+    - name: ⏳ Keep the session alive for 6 hours
+      run: |
+        echo "VNC server is running. Access is available for 6 hours."
+        sleep $((6 * 60 * 60))
